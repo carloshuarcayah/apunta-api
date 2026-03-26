@@ -78,4 +78,8 @@ public class ExpenseService {
                 .filter(e -> e.getUser().getId().equals(userId))
                 .orElseThrow(() -> new ResourceNotFoundException("Expense not found with id: " + id));
     }
+
+    public java.math.BigDecimal getTotalByUser(Long userId) {
+        return expenseRepository.sumTotalByUserId(userId);
+    }
 }

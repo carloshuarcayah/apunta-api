@@ -12,6 +12,8 @@ import pe.com.carlosh.tallyapi.expense.dto.ExpenseRequestDTO;
 import pe.com.carlosh.tallyapi.expense.dto.ExpenseResponseDTO;
 import pe.com.carlosh.tallyapi.user.User;
 
+import java.math.BigDecimal;
+
 @RestController
 @RequestMapping("/api/expenses")
 @RequiredArgsConstructor
@@ -69,5 +71,10 @@ public class ExpenseController {
             @AuthenticationPrincipal User user) {
 
         return ResponseEntity.ok(expenseService.enable(id, user.getId()));
+    }
+
+    @GetMapping("/total")
+    public ResponseEntity<BigDecimal> getTotal(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(expenseService.getTotalByUser(user.getId()));
     }
 }
