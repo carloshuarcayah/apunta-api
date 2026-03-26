@@ -14,7 +14,8 @@ public class UserDetailsConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> userRepository.findByEmail(username)
+        // 👇 Ahora busca por ambos campos usando el mismo input
+        return input -> userRepository.findByEmailOrUsername(input, input)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 }

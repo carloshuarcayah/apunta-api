@@ -44,10 +44,10 @@ public class UserService {
 
     public LoginResponseDTO login(LoginRequestDTO req) {
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(req.email(), req.password())
+                new UsernamePasswordAuthenticationToken(req.identifier(), req.password())
         );
 
-        User user = userRepository.findByEmail(req.email())
+        User user = userRepository.findByEmailOrUsername(req.identifier(), req.identifier())
                 .orElseThrow(() -> new ResourceNotFoundException("User does not exists"));
 
         String jwtToken = jwtService.generateToken(user);
