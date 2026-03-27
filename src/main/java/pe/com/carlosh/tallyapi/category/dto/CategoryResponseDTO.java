@@ -4,6 +4,7 @@ public record CategoryResponseDTO(
         Long id,
         String name,
         String description,
-        Boolean active
+        Boolean active,
+        Long userId
 ) {
 }

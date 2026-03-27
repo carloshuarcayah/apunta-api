@@ -6,11 +6,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import pe.com.carlosh.tallyapi.user.User;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
-@Table(name = "categories")
+@Table(name = "categories", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"name", "user_id"})
+})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Category {
     @Id
@@ -18,7 +22,7 @@ public class Category {
     @Getter
     private Long id;
 
-    @Column(nullable = false,length = 100,unique = true)
+    @Column(nullable = false,length = 100)
     @Getter
     private String name;
 
@@ -33,13 +37,19 @@ public class Category {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id",nullable = false)
+    @Getter
+    private User user;
+
     @Column(nullable = false)
     @Getter
     private boolean active;
 
-    public Category(String name, String description) {
+    public Category(String name, String description,User user) {
         this.name = name;
         this.description = description;
+        this.user= user;
         this.active = true;
     }
 

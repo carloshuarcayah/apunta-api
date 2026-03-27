@@ -39,7 +39,7 @@ public class ExpenseService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
-        Category category = categoryRepository.findByIdAndActiveTrue(req.categoryId())
+        Category category = categoryRepository.findByIdAndUserIdAndActiveTrue(req.categoryId(),userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + req.categoryId()));
 
         Expense expense = new Expense(req.amount(), req.description(), req.expenseDate(), user, category);
@@ -51,7 +51,7 @@ public class ExpenseService {
     public ExpenseResponseDTO update(Long id, ExpenseRequestDTO req, Long userId) {
         Expense expense = findByIdAndUserOrThrow(id, userId);
 
-        Category category = categoryRepository.findByIdAndActiveTrue(req.categoryId())
+        Category category = categoryRepository.findByIdAndUserIdAndActiveTrue(req.categoryId(),userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + req.categoryId()));
 
         expense.update(req.amount(), req.description(), req.expenseDate(), category);

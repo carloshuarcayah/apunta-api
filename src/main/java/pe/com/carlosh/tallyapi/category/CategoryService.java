@@ -9,45 +9,54 @@ import pe.com.carlosh.tallyapi.category.dto.CategoryRequestDTO;
 import pe.com.carlosh.tallyapi.category.dto.CategoryResponseDTO;
 import pe.com.carlosh.tallyapi.exception.AlreadyExistsException;
 import pe.com.carlosh.tallyapi.exception.ResourceNotFoundException;
+import pe.com.carlosh.tallyapi.user.User;
+import pe.com.carlosh.tallyapi.user.UserRepository;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class CategoryService {
     private final CategoryRepository categoryRepository;
+    private final UserRepository userRepository;
 
-    public Page<CategoryResponseDTO> findByActiveTrue(Pageable pageable){
-        return categoryRepository.findByActiveTrue(pageable).map(CategoryMapper::toResponse);
+    public Page<CategoryResponseDTO> findByActiveTrue(Long userId, Pageable pageable){
+        return categoryRepository.findByUserIdAndActiveTrue(userId, pageable)
+                .map(CategoryMapper::toResponse);
     }
 
-    public Page<CategoryResponseDTO> findByActiveFalse(Pageable pageable){
-        return categoryRepository.findByActiveFalse(pageable).map(CategoryMapper::toResponse);
+    public CategoryResponseDTO findById(Long id, Long userId){
+        Category category = findActiveOrThrow(id,userId);
+
+        return CategoryMapper.toResponse(category);
     }
 
-    public Page<CategoryResponseDTO> findByNameContainingIgnoreCaseAndActiveTrue(String name, Pageable pageable){
-        return categoryRepository.findByNameContainingIgnoreCaseAndActiveTrue(name,pageable).map(CategoryMapper::toResponse);
-    }
+//    public Page<CategoryResponseDTO> findByActiveFalse(Pageable pageable){
+//        return categoryRepository.findByActiveFalse(pageable).map(CategoryMapper::toResponse);
+//    }
 
-    public CategoryResponseDTO findById(Long id){
-        return  CategoryMapper.toResponse(findActiveOrThrow(id));
+    public Page<CategoryResponseDTO> findByName(Long userId,String name, Pageable pageable){
+        return categoryRepository.findByUserIdAndNameContainingIgnoreCaseAndActiveTrue(userId, name,pageable).map(CategoryMapper::toResponse);
     }
 
     @Transactional
-    public CategoryResponseDTO create(CategoryRequestDTO req){
+    public CategoryResponseDTO create(CategoryRequestDTO req,Long userId){
 
-        if(categoryRepository.existsByNameIgnoreCase(req.name())){
+        User user = userRepository.findById(userId).orElseThrow(()->new ResourceNotFoundException("User not found with id: "+userId));
+
+        if(categoryRepository.existsByUserIdAndNameIgnoreCaseAndActiveTrue(userId,req.name())){
             throw new AlreadyExistsException("Category already exists with name: "+req.name());
         }
 
-        Category category = CategoryMapper.toEntity(req);
+        Category category = CategoryMapper.toEntity(req,user);
 
         return CategoryMapper.toResponse(categoryRepository.save(category));
     }
 
     @Transactional
-    public CategoryResponseDTO update(Long id, CategoryRequestDTO req){
-        Category category = findActiveOrThrow(id);
-        if(category.nameChanged(req.name())&& categoryRepository.existsByNameIgnoreCase(req.name())){
+    public CategoryResponseDTO update(Long id,Long userId,CategoryRequestDTO req){
+        Category category = findActiveOrThrow(id,userId);
+
+        if(category.nameChanged(req.name())&& categoryRepository.existsByUserIdAndNameIgnoreCaseAndActiveTrue(userId,req.name())){
             throw new AlreadyExistsException("Category already exists with name: " + req.name());
         }
 
@@ -56,24 +65,28 @@ public class CategoryService {
     }
 
     @Transactional
-    public  CategoryResponseDTO delete(Long id){
-        Category category = findActiveOrThrow(id);
+    public  CategoryResponseDTO delete(Long id,Long userId){
+        Category category = findActiveOrThrow(id,userId);
+
+
         category.deactivate();
         return CategoryMapper.toResponse(category);
     }
 
     @Transactional
-    public  CategoryResponseDTO enable(Long id){
-        Category category = findAnyOrThrow(id);
-        category.activate();
-        return CategoryMapper.toResponse(category);
+    public  CategoryResponseDTO enable(Long id,Long userId){
+        Category category = findAnyOrThrow(id,userId);
+
+            category.activate();
+            return CategoryMapper.toResponse(category);
+
     }
 
-    private Category findActiveOrThrow(Long id){
-        return categoryRepository.findByIdAndActiveTrue(id).orElseThrow(()->new ResourceNotFoundException("Category not found with id: "+id));
+    private Category findActiveOrThrow(Long id,Long userId){
+        return categoryRepository.findByIdAndUserIdAndActiveTrue(id,userId).orElseThrow(()->new ResourceNotFoundException("Category not found or you don't have permission"));
     }
 
-    private Category findAnyOrThrow(Long id){
-        return categoryRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("Category not found with id: "+id));
+    private Category findAnyOrThrow(Long id,Long userId){
+        return categoryRepository.findByIdAndUserId(id,userId).orElseThrow(()->new ResourceNotFoundException("Category not found or you don't have permission"));
     }
 }
