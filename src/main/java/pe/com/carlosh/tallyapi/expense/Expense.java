@@ -64,12 +64,4 @@ public class Expense {
         this.expenseDate = expenseDate;
         this.category = category;
     }
-
-    public void activate(){
-        this.active=true;
-    }
-
-    public void deactivate(){
-        this.active=false;
-    }
 }

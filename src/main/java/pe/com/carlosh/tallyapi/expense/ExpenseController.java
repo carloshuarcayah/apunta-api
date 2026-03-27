@@ -57,19 +57,11 @@ public class ExpenseController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ExpenseResponseDTO> delete(
+    public ResponseEntity<Void> delete(
             @PathVariable Long id,
             @AuthenticationPrincipal User user) {
-
-        return ResponseEntity.ok(expenseService.delete(id, user.getId()));
-    }
-
-    @PatchMapping("/{id}/enable")
-    public ResponseEntity<ExpenseResponseDTO> enable(
-            @PathVariable Long id,
-            @AuthenticationPrincipal User user) {
-
-        return ResponseEntity.ok(expenseService.enable(id, user.getId()));
+        expenseService.delete(id, user.getId());
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/total")

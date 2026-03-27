@@ -76,19 +76,10 @@ public class ExpenseService {
     }
 
     @Transactional
-    public ExpenseResponseDTO delete(Long id, Long userId) {
+    public void delete(Long id, Long userId) {
         Expense expense = findByIdAndUserOrThrow(id, userId);
-        expense.deactivate();
-        return ExpenseMapper.toResponse(expense);
+        expenseRepository.delete(expense);
     }
-
-    @Transactional
-    public ExpenseResponseDTO enable(Long id, Long userId) {
-        Expense expense = findByIdAndUserOrThrow(id, userId);
-        expense.activate();
-        return ExpenseMapper.toResponse(expense);
-    }
-
 
     private Expense findByIdAndUserOrThrow(Long id, Long userId) {
         return expenseRepository.findById(id)
