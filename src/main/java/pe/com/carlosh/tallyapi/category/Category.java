@@ -9,12 +9,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 import pe.com.carlosh.tallyapi.user.User;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Entity
-@Table(name = "categories", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"name", "user_id"})
-})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Category {
     @Id
