@@ -3,6 +3,7 @@ package pe.com.carlosh.tallyapi.user.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import pe.com.carlosh.tallyapi.exception.PasswordMismatchException;
 
 public record UserRequestDTO(
         @NotBlank
@@ -17,7 +18,11 @@ public record UserRequestDTO(
 
         @NotBlank
         @Size(min = 8)
-        String password,
+        String password1,
+
+        @NotBlank
+        @Size(min = 8)
+        String password2,
 
         @NotBlank
         @Size(max = 50)

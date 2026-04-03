@@ -13,6 +13,7 @@ import pe.com.carlosh.tallyapi.category.Category;
 import pe.com.carlosh.tallyapi.category.CategoryRepository;
 import pe.com.carlosh.tallyapi.category.dto.CategoryStatsDTO;
 import pe.com.carlosh.tallyapi.exception.AlreadyExistsException;
+import pe.com.carlosh.tallyapi.exception.PasswordMismatchException;
 import pe.com.carlosh.tallyapi.exception.ResourceNotFoundException;
 import pe.com.carlosh.tallyapi.expense.ExpenseRepository;
 import pe.com.carlosh.tallyapi.expense.dto.ExpenseStatsDTO;
@@ -41,7 +42,11 @@ public class UserService {
             throw new AlreadyExistsException("Email already register");
         }
 
-        User user = UserMapper.toEntity(req,passwordEncoder.encode(req.password()));
+        if(!req.password1().equals(req.password2())){
+            throw new PasswordMismatchException("Password do not match");
+        }
+
+        User user = UserMapper.toEntity(req,passwordEncoder.encode(req.password1()));
 
         String jwtToken = jwtService.generateToken(userRepository.save(user));
         return new LoginResponseDTO(jwtToken,user.getUsername(),user.isOnboardingCompleted());
