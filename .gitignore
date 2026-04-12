@@ -32,3 +32,4 @@ build/
 ### VS Code ###
 .vscode/
 /repomix-output.xml
+/compose.dev.yml
