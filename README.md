@@ -35,7 +35,7 @@ Su version 1.0 ya está lista.
 ## Características
 
 - **Autenticación con JWT** stateless y verificación de email obligatoria antes del primer login.
-- **Envío asíncrono de emails** vía Resend (no bloquea el flujo de registro).
+- **Envío asíncrono de emails** vía Resend.
 - **Gestión de gastos** con filtros, paginación y estadísticas (totales por usuario, por categoría).
 - **Categorías personalizadas por usuario** con soft delete y reactivación.
 - **Presupuestos** para gastos de una sola categoría o para cualquier tipo de gasto.
@@ -57,14 +57,14 @@ Su version 1.0 ya está lista.
 - **Documentación:** Swagger
 - **Testing:** JUnit 5, Spring Boot Test, H2 (in-memory)
 - **Build:** Maven
-- **Contenedores:** Docker (multi-stage build)
+- **Contenedores:** Docker
 - **CI/CD:** GitHub Actions
 - **Hosting:** AWS EC2
 ---
 
 ## Arquitectura
 
-El proyecto sigue una **arquitectura modular por features** (no por capas técnicas). Cada feature agrupa su propio controller, service, repository, entidad, mapper y DTOs. Esto facilita escalar el proyecto.
+El proyecto sigue una **arquitectura modular por features** (no por capas técnicas). Cada feature agrupa su propio controller, service, repository, entidad, mapper y DTOs.
 
 ---
 
@@ -88,7 +88,7 @@ src/main/java/pe/com/carlosh/tallyapi/
 
 ### Requisitos previos
 
-- Docker (para MySQL local)
+- [Docker](https://www.docker.com)
 - Cuenta en [Resend](https://resend.com) para obtener una API key (**opcional**, solo si quieres probar el envío real de emails, sin el no podrás registrarte de manera normal)
 
 > No necesitas instalar Java ni Maven. Todo corre dentro de Docker.
@@ -113,7 +113,7 @@ Luego edita el archivo `.env` con tus valores. Los campos marcados como obligato
 ```bash
 # Obligatorios
 ROOT_PASS=tu_password_root
-MYSQL_PASS=tu_password_usuario
+MYSQL_PASS=igual_a_ROOT_PASS
 JWT_SECRET=una_cadena_aleatoria_de_al_menos_32_caracteres
 
 # Si quieres probar el envío de emails
