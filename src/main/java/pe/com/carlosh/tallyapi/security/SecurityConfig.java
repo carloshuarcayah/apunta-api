@@ -67,6 +67,8 @@ public class SecurityConfig {
 
         configuration.setAllowedOriginPatterns(List.of(
                 "https://tallygastos.lat",
+                "https://www.apunta.lat",
+                "https://apunta.lat",
                 "https://www.tallygastos.lat",
                 "https://tally-five-inky.vercel.app",
                 "http://localhost:5173")
