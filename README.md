@@ -98,8 +98,8 @@ src/main/java/pe/com/carlosh/tallyapi/
 
 ### 1. Clonar el repo
 ```bash
-git clone https://github.com/carloshuarcayah/Tally-API.git
-cd Tally-API
+git clone https://github.com/carloshuarcayah/apunta-api
+cd apunta-api
 ```
 
 ### 2. Configura las variables de entorno
@@ -113,7 +113,7 @@ Luego edita el archivo `.env` con tus valores. Los campos marcados como obligato
 ```bash
 # Obligatorios
 ROOT_PASS=tu_password_root
-MYSQL_PASS=igual_a_ROOT_PASS
+DATASOURCE_PASSWORD=tu_password_como_user
 JWT_SECRET=una_cadena_aleatoria_de_al_menos_32_caracteres
 
 # Si quieres probar el envío de emails
@@ -123,7 +123,7 @@ RESEND_FROM_EMAIL=onboarding@resend.tests
 # Opcionales (tienen valores por defecto)
 DATASOURCE_URL=jdbc:mysql://localhost:3306/tally_db
 MYSQL_DATABASE=tally_db
-MYSQL_USER=tally_user
+DATASOURCE_USERNAME=tally_user
 JWT_EXPIRATION=86400000
 ```
 
@@ -141,19 +141,22 @@ La documentación interactiva en `http://localhost:8080/swagger-ui.html`.
 
 ---
 
-## Variables de entorno necesarias
+## Variables de entorno
 
-| Variable | Descripción | Default                                |
-|---|---|----------------------------------------|
-| `DATASOURCE_URL` | JDBC URL de MySQL | `jdbc:mysql://localhost:3306/tally_db` |
-| `DATASOURCE_USERNAME` | Usuario de la BD | `tally_user`                           |
-| `DATASOURCE_PASSWORD` | Contraseña de la BD | — (requerido)                          |
-| `JWT_SECRET` | Clave HMAC para firmar tokens | — (requerido)                          |
-| `JWT_EXPIRATION` | TTL del JWT en milisegundos | `86400000` (24h)                       |
-| `RESEND_API_KEY` | API key de Resend | — (opcional)                           |
-| `RESEND_FROM_EMAIL` | Remitente verificado | `onboarding@tallygastos.lat`           |
-| `HIBERNATE_DDL` | Estrategia DDL de Hibernate | `update`                               |
-| `SHOW_SQL` | Loggear SQL en consola | `true`                                 |
+| Variable              | Descripción                   | Default                               |
+|-----------------------|-------------------------------|---------------------------------------|
+| `DATASOURCE_URL`      | JDBC URL de MySQL                 | `jdbc:mysql://localhost:3306/tally_db`|
+| `ROOT_PASS`           | Password root de MySQL            | — (requerido)                         |
+| `MYSQL_DATABASE`      | Nombre de la BD                   | `tally_db`                            |
+| `DATASOURCE_USERNAME` | Usuario de la BD                  | `tally_user`                          |
+| `DATASOURCE_PASSWORD` | Contraseña de la BD               | — (requerido)                         |
+| `JWT_SECRET`          | Clave HMAC para firmar tokens     | — (requerido)                         |
+| `JWT_EXPIRATION`      | TTL del JWT en milisegundos       | `86400000` (24h)                      |
+| `RESEND_API_KEY`      | API key de Resend                 | `re_xxxxxxxxx`                        |
+| `RESEND_FROM_EMAIL`   | Remitente verificado              | `onboarding@resend.test`              |
+| `HIBERNATE_DDL`       | Estrategia DDL de Hibernate       | `update`                              |
+| `SHOW_SQL`            | Loggear SQL en consola            | `true`                                |
+| `FORMAT_SQL`          | Formatear el SQL loggeado         | `true`                                |
 
 ---
 
