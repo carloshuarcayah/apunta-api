@@ -12,9 +12,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class EmailService {
 
+    private static final String PLACEHOLDER_API_KEY = "re_xxxxxxxxx";
+
     private final Resend resend;
     private final String fromEmail;
     private final String verificationUrl;
+    private final boolean apiKeyConfigured;
 
     public EmailService(
             @Value("${resend.api.key}") String apiKey,
@@ -24,11 +27,16 @@ public class EmailService {
         this.resend = new Resend(apiKey);
         this.fromEmail = fromEmail;
         this.verificationUrl = verificationUrl;
+        this.apiKeyConfigured = apiKey != null && !apiKey.isBlank() && !apiKey.equals(PLACEHOLDER_API_KEY);
     }
 
     @Async
     public void sendVerificationEmail(String toEmail, String token) {
         String verificationLink = verificationUrl + "?token=" + token;
+        if (!apiKeyConfigured) {
+            log.warn("RESEND_API_KEY not configured. Verification link for {}: {}", toEmail, verificationLink);
+            return;
+        }
 
         String htmlBody = String.format(
                 "<h2>Bienvenido a Apunta</h2>" +
