@@ -14,12 +14,16 @@ public class EmailService {
 
     private final Resend resend;
     private final String fromEmail;
+    private final String verificationUrl;
 
     public EmailService(
             @Value("${resend.api.key}") String apiKey,
-            @Value("${resend.from.email}") String fromEmail) {
+            @Value("${resend.from.email}") String fromEmail,
+            @Value("${frontend.verification.url}") String verificationUrl
+            ) {
         this.resend = new Resend(apiKey);
         this.fromEmail = fromEmail;
+        this.verificationUrl = verificationUrl;
     }
 
     @Async

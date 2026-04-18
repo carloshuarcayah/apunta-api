@@ -5,7 +5,7 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_DATABASE: ${MYSQL_DATABASE:-tally_db}
-      MYSQL_ROOT_PASSWORD: ${ROOT_PASS:?ROOT_PASS is required in .env}
+      MYSQL_ROOT_PASSWORD: ${DATASOURCE_PASSWORD:?DATASOURCE_PASSWORD is required in .env}
       MYSQL_USER: ${DATASOURCE_USERNAME:-tally_user}
       MYSQL_PASSWORD: ${DATASOURCE_PASSWORD:?DATASOURCE_PASSWORD is required in .env}
     ports:
@@ -31,11 +31,12 @@ services:
       DATASOURCE_PASSWORD: ${DATASOURCE_PASSWORD:?DATASOURCE_PASSWORD is required in .env}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required in .env}
       JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
-      RESEND_API_KEY: ${RESEND_API_KEY}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
       RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-onboarding@resend.test}
       HIBERNATE_DDL: ${HIBERNATE_DDL:-update}
       SHOW_SQL: ${SHOW_SQL:-true}
       FORMAT_SQL: ${FORMAT_SQL:-true}
+      FRONTEND_VERIFICATION_URL: ${FRONTEND_VERIFICATION_URL:-http://localhost:5173/verify}
     ports:
       - '8080:8080'
 
