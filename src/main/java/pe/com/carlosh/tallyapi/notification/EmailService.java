@@ -28,7 +28,7 @@ public class EmailService {
 
     @Async
     public void sendVerificationEmail(String toEmail, String token) {
-        String verificationLink = "https://apunta.lat/verify?token=" + token;
+        String verificationLink = verificationUrl + "?token=" + token;
 
         String htmlBody = String.format(
                 "<h2>Bienvenido a Apunta</h2>" +
