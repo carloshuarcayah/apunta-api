@@ -20,23 +20,17 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
 
-    public Page<CategoryResponseDTO> findByActiveTrue(Long userId, Pageable pageable){
-        return categoryRepository.findByUserIdAndActiveTrue(userId, pageable)
-                .map(CategoryMapper::toResponse);
+    public Page<CategoryResponseDTO> findAll(Long userId, String name, Pageable pageable){
+        Page<Category> result = (name == null || name.isBlank())
+                ? categoryRepository.findByUserIdAndActiveTrue(userId, pageable)
+                : categoryRepository.findByUserIdAndNameContainingIgnoreCaseAndActiveTrue(userId, name, pageable);
+        return result.map(CategoryMapper::toResponse);
     }
 
     public CategoryResponseDTO findById(Long id, Long userId){
         Category category = findActiveOrThrow(id,userId);
 
         return CategoryMapper.toResponse(category);
-    }
-
-//    public Page<CategoryResponseDTO> findByActiveFalse(Pageable pageable){
-//        return categoryRepository.findByActiveFalse(pageable).map(CategoryMapper::toResponse);
-//    }
-
-    public Page<CategoryResponseDTO> findByName(Long userId,String name, Pageable pageable){
-        return categoryRepository.findByUserIdAndNameContainingIgnoreCaseAndActiveTrue(userId, name,pageable).map(CategoryMapper::toResponse);
     }
 
     @Transactional
@@ -77,9 +71,13 @@ public class CategoryService {
     }
 
     @Transactional
-    public void enable(Long id, Long userId) {
+    public void setActive(Long id, Long userId, boolean active) {
         Category category = findAnyOrThrow(id, userId);
-        category.activate();
+        if (active) {
+            category.activate();
+        } else {
+            category.deactivate();
+        }
     }
 
     private Category findActiveOrThrow(Long id,Long userId){

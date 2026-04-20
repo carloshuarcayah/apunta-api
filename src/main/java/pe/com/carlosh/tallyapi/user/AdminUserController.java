@@ -7,8 +7,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import pe.com.carlosh.tallyapi.core.dto.SetActiveRequestDTO;
 import pe.com.carlosh.tallyapi.user.dto.ChangeRoleRequestDTO;
-import pe.com.carlosh.tallyapi.user.dto.SetActiveRequestDTO;
 import pe.com.carlosh.tallyapi.user.dto.UserResponseDTO;
 
 @RestController

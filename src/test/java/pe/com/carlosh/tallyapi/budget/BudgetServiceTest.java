@@ -326,18 +326,28 @@ class BudgetServiceTest {
     }
 
     @Nested
-    @DisplayName("enable")
-    class Enable {
+    @DisplayName("setActive")
+    class SetActive {
 
         @Test
-        @DisplayName("Ok: activates budget")
-        void success() {
+        @DisplayName("Ok: activates budget when active=true")
+        void activates() {
             budget.deactivate();
             when(budgetRepository.findByIdAndUserId(BUDGET_ID, USER_ID)).thenReturn(Optional.of(budget));
 
-            budgetService.enable(BUDGET_ID, USER_ID);
+            budgetService.setActive(BUDGET_ID, USER_ID, true);
 
             assertTrue(budget.isActive());
+        }
+
+        @Test
+        @DisplayName("Ok: deactivates budget when active=false")
+        void deactivates() {
+            when(budgetRepository.findByIdAndUserId(BUDGET_ID, USER_ID)).thenReturn(Optional.of(budget));
+
+            budgetService.setActive(BUDGET_ID, USER_ID, false);
+
+            assertFalse(budget.isActive());
         }
 
         @Test
@@ -346,7 +356,7 @@ class BudgetServiceTest {
             when(budgetRepository.findByIdAndUserId(BUDGET_ID, USER_ID)).thenReturn(Optional.empty());
 
             assertThrows(ResourceNotFoundException.class,
-                    () -> budgetService.enable(BUDGET_ID, USER_ID));
+                    () -> budgetService.setActive(BUDGET_ID, USER_ID, true));
         }
     }
 }

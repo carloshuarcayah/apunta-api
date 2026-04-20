@@ -1,4 +1,4 @@
-package pe.com.carlosh.tallyapi.user.dto;
+package pe.com.carlosh.tallyapi.core.dto;
 
 import jakarta.validation.constraints.NotNull;
 

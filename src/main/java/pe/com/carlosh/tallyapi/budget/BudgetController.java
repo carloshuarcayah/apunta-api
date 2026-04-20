@@ -10,6 +10,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import pe.com.carlosh.tallyapi.budget.dto.BudgetRequestDTO;
 import pe.com.carlosh.tallyapi.budget.dto.BudgetResponseDTO;
+import pe.com.carlosh.tallyapi.core.dto.SetActiveRequestDTO;
 import pe.com.carlosh.tallyapi.user.User;
 
 @RestController
@@ -56,11 +57,12 @@ public class BudgetController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{id}/enable")
-    public ResponseEntity<Void> enable(
+    @PatchMapping("/{id}/active")
+    public ResponseEntity<Void> setActive(
             @PathVariable Long id,
+            @Valid @RequestBody SetActiveRequestDTO req,
             @AuthenticationPrincipal User user) {
-        budgetService.enable(id, user.getId());
+        budgetService.setActive(id, user.getId(), req.active());
         return ResponseEntity.noContent().build();
     }
 }

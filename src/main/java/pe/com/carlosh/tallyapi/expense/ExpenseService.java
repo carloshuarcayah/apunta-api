@@ -140,11 +140,9 @@ public class ExpenseService {
                 .orElseThrow(() -> new ResourceNotFoundException("Expense not found with id: " + id));
     }
 
-    public BigDecimal getTotalByUser(Long userId) {
-        return expenseRepository.sumTotalByUserId(userId);
-    }
-
-    public BigDecimal getTotalByCategory(Long userId, Long categoryId) {
-        return expenseRepository.sumTotalByUserIdAndCategoryId(userId,categoryId);
+    public BigDecimal getTotal(Long userId, Long categoryId) {
+        return categoryId == null
+                ? expenseRepository.sumTotalByUserId(userId)
+                : expenseRepository.sumTotalByUserIdAndCategoryId(userId, categoryId);
     }
 }

@@ -89,9 +89,13 @@ public class BudgetService {
     }
 
     @Transactional
-    public void enable(Long id, Long userId) {
+    public void setActive(Long id, Long userId, boolean active) {
         Budget budget = findAnyOrThrow(id, userId);
-        budget.activate();
+        if (active) {
+            budget.activate();
+        } else {
+            budget.deactivate();
+        }
     }
 
     private Budget findActiveOrThrow(Long id, Long userId) {

@@ -67,12 +67,9 @@ public class ExpenseController {
     }
 
     @GetMapping("/total")
-    public ResponseEntity<BigDecimal> getTotal(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(expenseService.getTotalByUser(user.getId()));
-    }
-
-    @GetMapping("/total/{categoryId}")
-    public ResponseEntity<BigDecimal> getTotalByCategory(@AuthenticationPrincipal User user, @PathVariable Long categoryId) {
-        return ResponseEntity.ok(expenseService.getTotalByCategory(user.getId(),categoryId));
+    public ResponseEntity<BigDecimal> getTotal(
+            @RequestParam(required = false) Long categoryId,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(expenseService.getTotal(user.getId(), categoryId));
     }
 }

@@ -271,18 +271,18 @@ class ExpenseServiceTest {
     // ── totals ───────────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("GetTotalByUser - Ok: returns total spent by user")
-    void getTotalByUser_Success() {
+    @DisplayName("GetTotal - Ok: returns total spent by user when categoryId is null")
+    void getTotal_NoCategory_Success() {
         when(expenseRepository.sumTotalByUserId(USER_ID)).thenReturn(new BigDecimal("1500.00"));
 
-        assertEquals(new BigDecimal("1500.00"), expenseService.getTotalByUser(USER_ID));
+        assertEquals(new BigDecimal("1500.00"), expenseService.getTotal(USER_ID, null));
     }
 
     @Test
-    @DisplayName("GetTotalByCategory - Ok: returns total spent by user and category")
-    void getTotalByCategory_Success() {
+    @DisplayName("GetTotal - Ok: returns total spent by user and category")
+    void getTotal_WithCategory_Success() {
         when(expenseRepository.sumTotalByUserIdAndCategoryId(USER_ID, CAT_FOOD_ID)).thenReturn(new BigDecimal("500.00"));
 
-        assertEquals(new BigDecimal("500.00"), expenseService.getTotalByCategory(USER_ID, CAT_FOOD_ID));
+        assertEquals(new BigDecimal("500.00"), expenseService.getTotal(USER_ID, CAT_FOOD_ID));
     }
 }
