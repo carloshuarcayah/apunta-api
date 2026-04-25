@@ -120,4 +120,66 @@ class CategoryServiceTest {
         assertEquals("Cannot delete the last category", ex.getMessage());
         assertTrue(category.isActive());
     }
+
+    @Test
+    @DisplayName("Update Category - Error: throws InvalidOperationException when category is system")
+    void update_ThrowsInvalidOperationException_WhenSystemCategory() {
+        Category systemCategory = new Category(Category.DEFAULT_SYSTEM_NAME, null, user1);
+        systemCategory.setSystem(true);
+        ReflectionTestUtils.setField(systemCategory, "id", CATEGORY_ID);
+
+        when(categoryRepository.findByIdAndUserIdAndActiveTrue(CATEGORY_ID, USER_ID)).thenReturn(Optional.of(systemCategory));
+
+        CategoryRequestDTO req = new CategoryRequestDTO("Nuevo Nombre", "Desc");
+
+        assertThrows(InvalidOperationException.class,
+                () -> categoryService.update(CATEGORY_ID, USER_ID, req));
+
+        assertEquals(Category.DEFAULT_SYSTEM_NAME, systemCategory.getName());
+        verify(categoryRepository, never()).existsByUserIdAndNameIgnoreCaseAndActiveTrue(anyLong(), anyString());
+    }
+
+    @Test
+    @DisplayName("Delete Category - Error: throws InvalidOperationException when category is system")
+    void delete_ThrowsInvalidOperationException_WhenSystemCategory() {
+        Category systemCategory = new Category(Category.DEFAULT_SYSTEM_NAME, null, user1);
+        systemCategory.setSystem(true);
+        ReflectionTestUtils.setField(systemCategory, "id", CATEGORY_ID);
+
+        when(categoryRepository.findByIdAndUserIdAndActiveTrue(CATEGORY_ID, USER_ID)).thenReturn(Optional.of(systemCategory));
+
+        assertThrows(InvalidOperationException.class,
+                () -> categoryService.delete(CATEGORY_ID, USER_ID));
+
+        assertTrue(systemCategory.isActive());
+        verify(categoryRepository, never()).countByUserIdAndActiveTrue(anyLong());
+    }
+
+    @Test
+    @DisplayName("SetActive Category - Error: throws InvalidOperationException when deactivating system category")
+    void setActive_ThrowsInvalidOperationException_WhenDeactivatingSystemCategory() {
+        Category systemCategory = new Category(Category.DEFAULT_SYSTEM_NAME, null, user1);
+        systemCategory.setSystem(true);
+        ReflectionTestUtils.setField(systemCategory, "id", CATEGORY_ID);
+
+        when(categoryRepository.findByIdAndUserId(CATEGORY_ID, USER_ID)).thenReturn(Optional.of(systemCategory));
+
+        assertThrows(InvalidOperationException.class,
+                () -> categoryService.setActive(CATEGORY_ID, USER_ID, false));
+
+        assertTrue(systemCategory.isActive());
+    }
+
+    @Test
+    @DisplayName("SetActive Category - Error: throws InvalidOperationException when activating system category")
+    void setActive_ThrowsInvalidOperationException_WhenActivatingSystemCategory() {
+        Category systemCategory = new Category(Category.DEFAULT_SYSTEM_NAME, null, user1);
+        systemCategory.setSystem(true);
+        ReflectionTestUtils.setField(systemCategory, "id", CATEGORY_ID);
+
+        when(categoryRepository.findByIdAndUserId(CATEGORY_ID, USER_ID)).thenReturn(Optional.of(systemCategory));
+
+        assertThrows(InvalidOperationException.class,
+                () -> categoryService.setActive(CATEGORY_ID, USER_ID, true));
+    }
 }

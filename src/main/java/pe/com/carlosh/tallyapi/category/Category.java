@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import pe.com.carlosh.tallyapi.user.User;
@@ -14,6 +15,8 @@ import java.time.LocalDateTime;
 @Table(name = "categories")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Category {
+    public static final String DEFAULT_SYSTEM_NAME = "Sin categoria";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Getter
@@ -31,6 +34,10 @@ public class Category {
     private LocalDateTime createdAt;
 
     @Column(nullable = false)
+    @Setter @Getter
+    private boolean system;
+
+    @Column(nullable = false)
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
@@ -43,11 +50,12 @@ public class Category {
     @Getter
     private boolean active;
 
-    public Category(String name, String description,User user) {
+    public Category(String name, String description, User user) {
         this.name = name;
         this.description = description;
-        this.user= user;
+        this.user = user;
         this.active = true;
+        this.system = false;
     }
 
     public void update(String name, String description){

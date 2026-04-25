@@ -50,6 +50,7 @@ public class CategoryService {
     @Transactional
     public CategoryResponseDTO update(Long id,Long userId,CategoryRequestDTO req){
         Category category = findActiveOrThrow(id,userId);
+        ensureNotSystem(category);
 
         if(category.nameChanged(req.name())&& categoryRepository.existsByUserIdAndNameIgnoreCaseAndActiveTrue(userId,req.name())){
             throw new AlreadyExistsException("Category already exists with name: " + req.name());
@@ -62,6 +63,7 @@ public class CategoryService {
     @Transactional
     public void delete(Long id, Long userId) {
         Category category = findActiveOrThrow(id, userId);
+        ensureNotSystem(category);
 
         if (categoryRepository.countByUserIdAndActiveTrue(userId) <= 1) {
             throw new InvalidOperationException("Cannot delete the last category");
@@ -73,10 +75,19 @@ public class CategoryService {
     @Transactional
     public void setActive(Long id, Long userId, boolean active) {
         Category category = findAnyOrThrow(id, userId);
+        
+        ensureNotSystem(category);
+        
         if (active) {
             category.activate();
         } else {
             category.deactivate();
+        }
+    }
+
+    private void ensureNotSystem(Category category) {
+        if (category.isSystem()) {
+            throw new InvalidOperationException("System category cannot be modified or deleted");
         }
     }
 

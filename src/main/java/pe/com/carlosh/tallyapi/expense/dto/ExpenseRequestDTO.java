@@ -8,6 +8,6 @@ import java.time.LocalDate;
 public record ExpenseRequestDTO(
         @NotNull @Positive BigDecimal amount,
         String description,
-        @NotNull Long categoryId,
+        Long categoryId,
         Long budgetId
 ) {}

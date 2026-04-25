@@ -39,13 +39,11 @@ public class UserService {
     private final BudgetRepository budgetRepository;
     private final CategoryRepository categoryRepository;
 
-    // Dentro de UserService.java
-
     private final VerificationTokenRepository tokenRepository;
     private final EmailService emailService;
 
     @Transactional
-    public void register(UserRequestDTO req) { // Ya no devuelve LoginResponseDTO
+    public void register(UserRequestDTO req) {
         if (userRepository.existsByEmail(req.email())) {
             throw new AlreadyExistsException("El email ya está registrado");
         }
@@ -73,7 +71,7 @@ public class UserService {
         User user = userRepository.findByEmailOrUsername(req.identifier(), req.identifier())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no existe"));
 
-        // EL CANDADO: Si no ha verificado su correo, lo rebotamos.
+        // Si no ha verificado su correo, no puede ingresar.
         if (!user.isEmailVerified()) {
             throw new InvalidOperationException("Debes verificar tu correo electrónico antes de poder iniciar sesión.");
         }
@@ -124,7 +122,6 @@ public class UserService {
         );
     }
 
-    // 1. El nuevo método de verificación
     @Transactional
     public void verifyEmail(String token) {
         VerificationToken verificationToken = tokenRepository.findByToken(token)
@@ -140,7 +137,12 @@ public class UserService {
         user.setEmailVerified(true);
         userRepository.save(user);
 
-        // Limpiamos el token de la BD porque ya se usó (¡Buena práctica de seguridad y limpieza!)
+        //creamos la categoria sin categoria por defecto
+        Category category = new Category(Category.DEFAULT_SYSTEM_NAME, null, user);
+        category.setSystem(true);
+        categoryRepository.save(category);
+
+        // Limpiamos el token de la BD porque ya se usó
         tokenRepository.delete(verificationToken);
     }
 
