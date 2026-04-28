@@ -109,7 +109,10 @@ public class UserService {
 
         BigDecimal totalSpent = expenseRepository.sumTotalByUserId(userId);
         BigDecimal thisMonth = expenseRepository.sumTotalByUserIdThisMonth(userId);
+        BigDecimal lastMonth = expenseRepository.sumTotalByUserIdLastMonth(userId);
+        BigDecimal vsLastMonthPercent = percentChange(thisMonth, lastMonth);
         long expenseCount = expenseRepository.countByUserId(userId);
+        long thisMonthCount = expenseRepository.countByUserIdThisMonth(userId);
 
 
         long budgetCount = budgetRepository.countByUserIdAndActiveTrue(userId);
@@ -118,15 +121,24 @@ public class UserService {
         long categoryCount = categoryRepository.countByUserIdAndActiveTrueAndPredefinedFalse(userId);
 
         String topName = null;
-        BigDecimal topSpent = BigDecimal.ZERO;
+        Long topCategoryId = null;
+        BigDecimal topThisMonth = BigDecimal.ZERO;
 
         List<Category> categories = categoryRepository.findByUserIdAndActiveTrue(userId);
         for (Category cat : categories) {
-            BigDecimal spent = expenseRepository.sumTotalByUserIdAndCategoryId(userId, cat.getId());
-            if (spent.compareTo(topSpent) > 0) {
-                topSpent = spent;
+            BigDecimal spent = expenseRepository.sumTotalByUserIdAndCategoryIdThisMonth(userId, cat.getId());
+            if (spent.compareTo(topThisMonth) > 0) {
+                topThisMonth = spent;
                 topName = cat.getName();
+                topCategoryId = cat.getId();
             }
+        }
+
+        BigDecimal topSpent = BigDecimal.ZERO;
+        long topThisMonthCount = 0;
+        if (topCategoryId != null) {
+            topSpent = expenseRepository.sumTotalByUserIdAndCategoryId(userId, topCategoryId);
+            topThisMonthCount = expenseRepository.countByUserIdAndCategoryIdThisMonth(userId, topCategoryId);
         }
 
         TierInfoDTO tierInfo = new TierInfoDTO(tier.getName().name(), tier.getMaxCategories(), tier.getMaxBudgets());
@@ -134,8 +146,8 @@ public class UserService {
         return new UserStatsDTO(
                 tierInfo,
                 new BudgetStatsDTO(budgetCount, tier.getMaxBudgets(), exceededCount),
-                new ExpenseStatsDTO(totalSpent, thisMonth, expenseCount),
-                new CategoryStatsDTO(categoryCount, tier.getMaxCategories(), topName, topSpent)
+                new ExpenseStatsDTO(totalSpent, thisMonth, lastMonth, vsLastMonthPercent, expenseCount, thisMonthCount),
+                new CategoryStatsDTO(categoryCount, tier.getMaxCategories(), topName, topSpent, topThisMonth, topThisMonthCount)
         );
     }
 
@@ -163,4 +175,10 @@ public class UserService {
         tokenRepository.delete(verificationToken);
     }
 
+    private BigDecimal percentChange(BigDecimal current, BigDecimal previous) {
+        if (previous == null || previous.signum() == 0) return null;
+        return current.subtract(previous)
+                .multiply(BigDecimal.valueOf(100))
+                .divide(previous, 2, java.math.RoundingMode.HALF_UP);
+    }
 }

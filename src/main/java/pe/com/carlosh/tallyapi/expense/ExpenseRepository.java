@@ -36,6 +36,18 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     @Query("SELECT COALESCE(SUM(e.amount), 0) FROM Expense e WHERE e.user.id = :userId AND e.active = true AND MONTH(e.expenseDate) = MONTH(CURRENT_DATE) AND YEAR(e.expenseDate) = YEAR(CURRENT_DATE)")
     BigDecimal sumTotalByUserIdThisMonth(@Param("userId") Long userId);
 
+    @Query("SELECT COUNT(e) FROM Expense e WHERE e.user.id = :userId AND e.active = true AND MONTH(e.expenseDate) = MONTH(CURRENT_DATE) AND YEAR(e.expenseDate) = YEAR(CURRENT_DATE)")
+    long countByUserIdThisMonth(@Param("userId") Long userId);
+
+    @Query(value = "SELECT COALESCE(SUM(e.amount), 0) FROM expenses e WHERE e.user_id = :userId AND e.active = true AND MONTH(e.expense_date) = MONTH(CURRENT_DATE - INTERVAL 1 MONTH) AND YEAR(e.expense_date) = YEAR(CURRENT_DATE - INTERVAL 1 MONTH)", nativeQuery = true)
+    BigDecimal sumTotalByUserIdLastMonth(@Param("userId") Long userId);
+
+    @Query("SELECT COALESCE(SUM(e.amount), 0) FROM Expense e WHERE e.user.id = :userId AND e.category.id = :categoryId AND e.active = true AND MONTH(e.expenseDate) = MONTH(CURRENT_DATE) AND YEAR(e.expenseDate) = YEAR(CURRENT_DATE)")
+    BigDecimal sumTotalByUserIdAndCategoryIdThisMonth(@Param("userId") Long userId, @Param("categoryId") Long categoryId);
+
+    @Query("SELECT COUNT(e) FROM Expense e WHERE e.user.id = :userId AND e.category.id = :categoryId AND e.active = true AND MONTH(e.expenseDate) = MONTH(CURRENT_DATE) AND YEAR(e.expenseDate) = YEAR(CURRENT_DATE)")
+    long countByUserIdAndCategoryIdThisMonth(@Param("userId") Long userId, @Param("categoryId") Long categoryId);
+
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE Expense e SET e.category = :newCategory WHERE e.category = :oldCategory")
     int reassignCategory(@Param("oldCategory") Category oldCategory, @Param("newCategory") Category newCategory);

@@ -5,6 +5,9 @@ import java.math.BigDecimal;
 public record ExpenseStatsDTO(
         BigDecimal total,
         BigDecimal thisMonth,
-        long count
+        BigDecimal lastMonth,
+        BigDecimal vsLastMonthPercent,
+        long count,
+        long thisMonthCount
 ) {
 }
