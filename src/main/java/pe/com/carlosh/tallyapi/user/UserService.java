@@ -65,7 +65,7 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("Default tier not found"));
 
         User user = UserMapper.toEntity(req, passwordEncoder.encode(req.password1()));
-        user.setTier(freeTier);
+        user.assignTier(freeTier);
         userRepository.save(user);
 
         VerificationToken verificationToken = new VerificationToken(user);
@@ -101,7 +101,7 @@ public class UserService {
     public void completeOnboarding(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
-        user.setOnboardingCompleted(true);
+        user.completeOnboarding();
         userRepository.save(user);
     }
 
@@ -154,7 +154,7 @@ public class UserService {
 
         // Activamos el correo del usuario
         User user = verificationToken.getUser();
-        user.setEmailVerified(true);
+        user.verifyEmail();
         userRepository.save(user);
 
         //creamos la categoria sin categoria por defecto

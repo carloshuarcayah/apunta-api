@@ -109,7 +109,7 @@ class UserServiceTest {
     @DisplayName("Login - Ok: returns token when user is verified")
     void login_Success() {
         LoginRequestDTO req = new LoginRequestDTO("test@mail.com", "password");
-        user.setEmailVerified(true);
+        user.verifyEmail();
 
         when(userRepository.findByEmailOrUsername("test@mail.com", "test@mail.com")).thenReturn(Optional.of(user));
         when(jwtService.generateToken(user)).thenReturn("fake-jwt-token");

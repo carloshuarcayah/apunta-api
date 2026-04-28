@@ -19,7 +19,8 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Getter @Setter
+@Getter
+@Setter(AccessLevel.PROTECTED)
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -118,5 +119,25 @@ public class User implements UserDetails {
 
     public String getNickname(){
         return this.username;
+    }
+
+    public void verifyEmail() {
+        this.emailVerified = true;
+    }
+
+    public void completeOnboarding() {
+        this.onboardingCompleted = true;
+    }
+
+    public void assignTier(Tier tier) {
+        this.tier = tier;
+    }
+
+    public void changeRole(Role role) {
+        this.role = role;
+    }
+
+    public void changeActive(boolean active) {
+        this.active = active;
     }
 }

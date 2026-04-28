@@ -53,7 +53,7 @@ class BudgetServiceTest {
     void setUp() {
         user = new User("test@mail.com", "123456789", "tester", "pass", "Carlos", "Test");
         ReflectionTestUtils.setField(user, "id", USER_ID);
-        user.setTier(new pe.com.carlosh.tallyapi.tier.Tier(pe.com.carlosh.tallyapi.tier.TierName.FREE, 5, 4));
+        user.assignTier(new pe.com.carlosh.tallyapi.tier.Tier(pe.com.carlosh.tallyapi.tier.TierName.FREE, 5, 4));
 
         category = new Category("Comida", "Gastos de comida", user);
         ReflectionTestUtils.setField(category, "id", CATEGORY_ID);

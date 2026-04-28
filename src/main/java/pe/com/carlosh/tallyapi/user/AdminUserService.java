@@ -35,7 +35,7 @@ public class AdminUserService {
     public void setActive(Long id, boolean active) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado: " + id));
-        user.setActive(active);
+        user.changeActive(active);
         userRepository.save(user);
     }
 
@@ -43,7 +43,7 @@ public class AdminUserService {
     public void changeRole(Long id, Role role) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado: " + id));
-        user.setRole(role);
+        user.changeRole(role);
         userRepository.save(user);
     }
 

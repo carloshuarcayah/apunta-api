@@ -245,6 +245,7 @@ class ExpenseServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Expense> page = new PageImpl<>(List.of());
 
+        when(budgetRepository.findByIdAndUserIdAndActiveTrue(BUDGET_FOOD_ID, USER_ID)).thenReturn(Optional.of(budgetFood));
         when(expenseRepository.findByUserIdAndActiveTrueAndBudgetId(USER_ID, BUDGET_FOOD_ID, pageable)).thenReturn(page);
         when(expenseRepository.sumTotalByBudgetIdAndUserId(BUDGET_FOOD_ID, USER_ID)).thenReturn(new BigDecimal("50.00"));
 
@@ -260,6 +261,7 @@ class ExpenseServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Expense> page = new PageImpl<>(List.of());
 
+        when(categoryRepository.findByIdAndUserIdAndActiveTrue(CAT_FOOD_ID, USER_ID)).thenReturn(Optional.of(categoryFood));
         when(expenseRepository.findByUserIdAndActiveTrueAndCategoryId(USER_ID, CAT_FOOD_ID, pageable)).thenReturn(page);
         when(expenseRepository.sumTotalByUserIdAndCategoryId(USER_ID, CAT_FOOD_ID)).thenReturn(new BigDecimal("30.00"));
 
