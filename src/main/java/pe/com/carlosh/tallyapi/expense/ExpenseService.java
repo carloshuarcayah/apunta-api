@@ -89,27 +89,25 @@ public class ExpenseService {
         return ExpenseMapper.toResponse(expense);
     }
 
-    public ExpenseListResponseDTO findByFilters(Long userId, Long categoryId, Long budgetId, Pageable pageable) {
-        Page<ExpenseResponseDTO> expenses;
-        BigDecimal total;
+    public ExpenseListResponseDTO findByFilters(Long userId, Long categoryId, Long budgetId,
+                                                LocalDate from, LocalDate to, Pageable pageable) {
+        if (from != null && to != null && from.isAfter(to)) {
+            throw new InvalidOperationException("'from' must be before or equal to 'to'");
+        }
 
         if (budgetId != null) {
             budgetRepository.findByIdAndUserIdAndActiveTrue(budgetId, userId)
                     .orElseThrow(() -> new ResourceNotFoundException("Budget not found with id: " + budgetId));
-            expenses = expenseRepository.findByUserIdAndActiveTrueAndBudgetId(userId, budgetId, pageable)
-                    .map(ExpenseMapper::toResponse);
-            total = expenseRepository.sumTotalByBudgetIdAndUserId(budgetId, userId);
-        } else if (categoryId != null) {
+        }
+        if (categoryId != null) {
             categoryRepository.findByIdAndUserIdAndActiveTrue(categoryId, userId)
                     .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + categoryId));
-            expenses = expenseRepository.findByUserIdAndActiveTrueAndCategoryId(userId, categoryId, pageable)
-                    .map(ExpenseMapper::toResponse);
-            total = expenseRepository.sumTotalByUserIdAndCategoryId(userId, categoryId);
-        } else {
-            expenses = expenseRepository.findByUserIdAndActiveTrue(userId, pageable)
-                    .map(ExpenseMapper::toResponse);
-            total = expenseRepository.sumTotalByUserId(userId);
         }
+
+        Page<ExpenseResponseDTO> expenses = expenseRepository
+                .findByFilters(userId, categoryId, budgetId, from, to, pageable)
+                .map(ExpenseMapper::toResponse);
+        BigDecimal total = expenseRepository.sumByFilters(userId, categoryId, budgetId, from, to);
 
         return new ExpenseListResponseDTO(expenses, total);
     }

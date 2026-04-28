@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import pe.com.carlosh.tallyapi.category.Category;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
@@ -69,4 +70,41 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             GROUP BY e.category.id
             """)
     List<Object[]> sumByCategoryIds(@Param("userId") Long userId, @Param("categoryIds") Collection<Long> categoryIds);
+
+    @Query(value = """
+            SELECT e FROM Expense e
+            WHERE e.user.id = :userId AND e.active = true
+              AND (:categoryId IS NULL OR e.category.id = :categoryId)
+              AND (:budgetId IS NULL OR e.budget.id = :budgetId)
+              AND (:from IS NULL OR e.expenseDate >= :from)
+              AND (:to IS NULL OR e.expenseDate <= :to)
+            """,
+            countQuery = """
+            SELECT COUNT(e) FROM Expense e
+            WHERE e.user.id = :userId AND e.active = true
+              AND (:categoryId IS NULL OR e.category.id = :categoryId)
+              AND (:budgetId IS NULL OR e.budget.id = :budgetId)
+              AND (:from IS NULL OR e.expenseDate >= :from)
+              AND (:to IS NULL OR e.expenseDate <= :to)
+            """)
+    Page<Expense> findByFilters(@Param("userId") Long userId,
+                                @Param("categoryId") Long categoryId,
+                                @Param("budgetId") Long budgetId,
+                                @Param("from") LocalDate from,
+                                @Param("to") LocalDate to,
+                                Pageable pageable);
+
+    @Query("""
+            SELECT COALESCE(SUM(e.amount), 0) FROM Expense e
+            WHERE e.user.id = :userId AND e.active = true
+              AND (:categoryId IS NULL OR e.category.id = :categoryId)
+              AND (:budgetId IS NULL OR e.budget.id = :budgetId)
+              AND (:from IS NULL OR e.expenseDate >= :from)
+              AND (:to IS NULL OR e.expenseDate <= :to)
+            """)
+    BigDecimal sumByFilters(@Param("userId") Long userId,
+                            @Param("categoryId") Long categoryId,
+                            @Param("budgetId") Long budgetId,
+                            @Param("from") LocalDate from,
+                            @Param("to") LocalDate to);
 }

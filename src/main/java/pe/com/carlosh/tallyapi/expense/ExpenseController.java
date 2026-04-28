@@ -3,6 +3,7 @@ package pe.com.carlosh.tallyapi.expense;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -13,6 +14,7 @@ import pe.com.carlosh.tallyapi.expense.dto.ExpenseListResponseDTO;
 import pe.com.carlosh.tallyapi.user.User;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Map;
 
 @RestController
@@ -29,9 +31,11 @@ public class ExpenseController {
     public ResponseEntity<ExpenseListResponseDTO> findAll(
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) Long budgetId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
             @AuthenticationPrincipal User user,
             Pageable pageable) {
-        return ResponseEntity.ok(expenseService.findByFilters(user.getId(), categoryId, budgetId, pageable));
+        return ResponseEntity.ok(expenseService.findByFilters(user.getId(), categoryId, budgetId, from, to, pageable));
     }
 
     @GetMapping("/{id}")

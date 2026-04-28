@@ -25,6 +25,7 @@ import pe.com.carlosh.tallyapi.user.User;
 import pe.com.carlosh.tallyapi.user.UserRepository;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -231,10 +232,10 @@ class ExpenseServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Expense> page = new PageImpl<>(List.of());
 
-        when(expenseRepository.findByUserIdAndActiveTrue(USER_ID, pageable)).thenReturn(page);
-        when(expenseRepository.sumTotalByUserId(USER_ID)).thenReturn(new BigDecimal("100.00"));
+        when(expenseRepository.findByFilters(USER_ID, null, null, null, null, pageable)).thenReturn(page);
+        when(expenseRepository.sumByFilters(USER_ID, null, null, null, null)).thenReturn(new BigDecimal("100.00"));
 
-        ExpenseListResponseDTO result = expenseService.findByFilters(USER_ID, null, null, pageable);
+        ExpenseListResponseDTO result = expenseService.findByFilters(USER_ID, null, null, null, null, pageable);
 
         assertEquals(new BigDecimal("100.00"), result.total());
     }
@@ -246,13 +247,12 @@ class ExpenseServiceTest {
         Page<Expense> page = new PageImpl<>(List.of());
 
         when(budgetRepository.findByIdAndUserIdAndActiveTrue(BUDGET_FOOD_ID, USER_ID)).thenReturn(Optional.of(budgetFood));
-        when(expenseRepository.findByUserIdAndActiveTrueAndBudgetId(USER_ID, BUDGET_FOOD_ID, pageable)).thenReturn(page);
-        when(expenseRepository.sumTotalByBudgetIdAndUserId(BUDGET_FOOD_ID, USER_ID)).thenReturn(new BigDecimal("50.00"));
+        when(expenseRepository.findByFilters(USER_ID, null, BUDGET_FOOD_ID, null, null, pageable)).thenReturn(page);
+        when(expenseRepository.sumByFilters(USER_ID, null, BUDGET_FOOD_ID, null, null)).thenReturn(new BigDecimal("50.00"));
 
-        ExpenseListResponseDTO result = expenseService.findByFilters(USER_ID, null, BUDGET_FOOD_ID, pageable);
+        ExpenseListResponseDTO result = expenseService.findByFilters(USER_ID, null, BUDGET_FOOD_ID, null, null, pageable);
 
         assertEquals(new BigDecimal("50.00"), result.total());
-        verify(expenseRepository, never()).findByUserIdAndActiveTrue(any(), any());
     }
 
     @Test
@@ -262,12 +262,41 @@ class ExpenseServiceTest {
         Page<Expense> page = new PageImpl<>(List.of());
 
         when(categoryRepository.findByIdAndUserIdAndActiveTrue(CAT_FOOD_ID, USER_ID)).thenReturn(Optional.of(categoryFood));
-        when(expenseRepository.findByUserIdAndActiveTrueAndCategoryId(USER_ID, CAT_FOOD_ID, pageable)).thenReturn(page);
-        when(expenseRepository.sumTotalByUserIdAndCategoryId(USER_ID, CAT_FOOD_ID)).thenReturn(new BigDecimal("30.00"));
+        when(expenseRepository.findByFilters(USER_ID, CAT_FOOD_ID, null, null, null, pageable)).thenReturn(page);
+        when(expenseRepository.sumByFilters(USER_ID, CAT_FOOD_ID, null, null, null)).thenReturn(new BigDecimal("30.00"));
 
-        ExpenseListResponseDTO result = expenseService.findByFilters(USER_ID, CAT_FOOD_ID, null, pageable);
+        ExpenseListResponseDTO result = expenseService.findByFilters(USER_ID, CAT_FOOD_ID, null, null, null, pageable);
 
         assertEquals(new BigDecimal("30.00"), result.total());
+    }
+
+    @Test
+    @DisplayName("FindByFilters - Ok: with date range filters by expenseDate")
+    void findByFilters_WithDateRange() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Expense> page = new PageImpl<>(List.of());
+        LocalDate from = LocalDate.of(2026, 4, 1);
+        LocalDate to = LocalDate.of(2026, 4, 30);
+
+        when(expenseRepository.findByFilters(USER_ID, null, null, from, to, pageable)).thenReturn(page);
+        when(expenseRepository.sumByFilters(USER_ID, null, null, from, to)).thenReturn(new BigDecimal("75.00"));
+
+        ExpenseListResponseDTO result = expenseService.findByFilters(USER_ID, null, null, from, to, pageable);
+
+        assertEquals(new BigDecimal("75.00"), result.total());
+    }
+
+    @Test
+    @DisplayName("FindByFilters - Error: from after to throws InvalidOperationException")
+    void findByFilters_FromAfterTo_Throws() {
+        Pageable pageable = PageRequest.of(0, 10);
+        LocalDate from = LocalDate.of(2026, 4, 30);
+        LocalDate to = LocalDate.of(2026, 4, 1);
+
+        assertThrows(InvalidOperationException.class,
+                () -> expenseService.findByFilters(USER_ID, null, null, from, to, pageable));
+
+        verify(expenseRepository, never()).findByFilters(any(), any(), any(), any(), any(), any());
     }
 
     // ── totals ───────────────────────────────────────────────────────────
