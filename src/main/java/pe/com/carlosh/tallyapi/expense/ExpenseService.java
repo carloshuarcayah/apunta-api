@@ -90,10 +90,14 @@ public class ExpenseService {
         BigDecimal total;
 
         if (budgetId != null) {
+            budgetRepository.findByIdAndUserIdAndActiveTrue(budgetId, userId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Budget not found with id: " + budgetId));
             expenses = expenseRepository.findByUserIdAndActiveTrueAndBudgetId(userId, budgetId, pageable)
                     .map(ExpenseMapper::toResponse);
             total = expenseRepository.sumTotalByBudgetIdAndUserId(budgetId, userId);
         } else if (categoryId != null) {
+            categoryRepository.findByIdAndUserIdAndActiveTrue(categoryId, userId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + categoryId));
             expenses = expenseRepository.findByUserIdAndActiveTrueAndCategoryId(userId, categoryId, pageable)
                     .map(ExpenseMapper::toResponse);
             total = expenseRepository.sumTotalByUserIdAndCategoryId(userId, categoryId);
