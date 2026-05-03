@@ -13,6 +13,7 @@ import pe.com.carlosh.tallyapi.core.exception.AlreadyExistsException;
 import pe.com.carlosh.tallyapi.core.exception.InvalidOperationException;
 import pe.com.carlosh.tallyapi.core.exception.ResourceNotFoundException;
 import pe.com.carlosh.tallyapi.expense.ExpenseRepository;
+import pe.com.carlosh.tallyapi.expense.dto.CategoryTotalDTO;
 import pe.com.carlosh.tallyapi.user.User;
 import pe.com.carlosh.tallyapi.user.UserRepository;
 
@@ -49,10 +50,9 @@ public class CategoryService {
         List<Long> ids = page.getContent().stream().map(Category::getId).toList();
         Map<Long, BigDecimal> sums = new HashMap<>();
         Map<Long, Long> counts = new HashMap<>();
-        for (Object[] row : expenseRepository.sumByCategoryIds(userId, ids)) {
-            Long catId = (Long) row[0];
-            sums.put(catId, (BigDecimal) row[1]);
-            counts.put(catId, (Long) row[2]);
+        for (CategoryTotalDTO row : expenseRepository.sumByCategoryIds(userId, ids)) {
+            sums.put(row.categoryId(), row.total());
+            counts.put(row.categoryId(), row.count());
         }
 
         return page.map(c -> CategoryMapper.toStatsResponse(
@@ -115,7 +115,7 @@ public class CategoryService {
                     return categoryRepository.save(created);
                 });
 
-        expenseRepository.reassignCategory(category, fallback);
+        expenseRepository.reassignCategory(category, fallback, userId);
         budgetRepository.clearCategory(category);
 
         categoryRepository.delete(category);

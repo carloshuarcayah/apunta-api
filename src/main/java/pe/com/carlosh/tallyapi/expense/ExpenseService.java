@@ -11,6 +11,7 @@ import pe.com.carlosh.tallyapi.category.Category;
 import pe.com.carlosh.tallyapi.category.CategoryRepository;
 import pe.com.carlosh.tallyapi.core.exception.InvalidOperationException;
 import pe.com.carlosh.tallyapi.core.exception.ResourceNotFoundException;
+import pe.com.carlosh.tallyapi.expense.dto.DailyTotalDTO;
 import pe.com.carlosh.tallyapi.expense.dto.ExpenseListResponseDTO;
 import pe.com.carlosh.tallyapi.expense.dto.ExpenseRequestDTO;
 import pe.com.carlosh.tallyapi.expense.dto.ExpenseResponseDTO;
@@ -19,6 +20,7 @@ import pe.com.carlosh.tallyapi.user.UserRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,23 +36,6 @@ public class ExpenseService {
 
     public Page<ExpenseResponseDTO> findByUser(Long userId, Pageable pageable) {
         return expenseRepository.findByUserIdAndActiveTrue(userId, pageable).map(ExpenseMapper::toResponse);
-    }
-
-    //SOLO EXPENSES ACTIVAS
-    public ExpenseListResponseDTO findByUserIdAndCategoryId(Long userId, Long categoryId, Pageable pageable) {
-        Page<ExpenseResponseDTO> expenses;
-        BigDecimal total;
-
-        if(categoryId!=null){
-            expenses = expenseRepository.findByUserIdAndActiveTrueAndCategoryId(userId, categoryId, pageable).map(ExpenseMapper::toResponse);
-            total = expenseRepository.sumTotalByUserIdAndCategoryId(userId, categoryId);
-        }
-        else{
-            expenses = expenseRepository.findByUserId(userId,pageable).map(ExpenseMapper::toResponse);
-            total = expenseRepository.sumTotalByUserId(userId);
-        }
-
-        return new ExpenseListResponseDTO(expenses,total);
     }
 
     public ExpenseResponseDTO findById(Long id, Long userId) {
@@ -152,21 +137,20 @@ public class ExpenseService {
     }
 
     public BigDecimal getTotal(Long userId, Long categoryId) {
-        return categoryId == null
-                ? expenseRepository.sumTotalByUserId(userId)
-                : expenseRepository.sumTotalByUserIdAndCategoryId(userId, categoryId);
+        return expenseRepository.sumByFilters(userId, categoryId, null, null, null);
     }
 
     public Map<String, BigDecimal> getCalendar(Long userId, int year, int month) {
         if (month < 1 || month > 12) {
             throw new InvalidOperationException("month must be between 1 and 12");
         }
-        List<Object[]> rows = expenseRepository.sumByUserIdGroupedByDate(userId, year, month);
+        YearMonth ym = YearMonth.of(year, month);
+        LocalDate from = ym.atDay(1);
+        LocalDate to = ym.atEndOfMonth();
+
         Map<String, BigDecimal> result = new LinkedHashMap<>();
-        for (Object[] row : rows) {
-            LocalDate date = (LocalDate) row[0];
-            BigDecimal total = (BigDecimal) row[1];
-            result.put(date.toString(), total);
+        for (DailyTotalDTO row : expenseRepository.sumGroupedByDate(userId, from, to)) {
+            result.put(row.date().toString(), row.total());
         }
         return result;
     }

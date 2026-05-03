@@ -20,6 +20,7 @@ import pe.com.carlosh.tallyapi.core.exception.AlreadyExistsException;
 import pe.com.carlosh.tallyapi.core.exception.InvalidOperationException;
 import pe.com.carlosh.tallyapi.core.exception.ResourceNotFoundException;
 import pe.com.carlosh.tallyapi.expense.ExpenseRepository;
+import pe.com.carlosh.tallyapi.expense.dto.CategoryTotalDTO;
 import pe.com.carlosh.tallyapi.user.User;
 import pe.com.carlosh.tallyapi.user.UserRepository;
 
@@ -139,7 +140,7 @@ class CategoryServiceTest {
 
         categoryService.delete(CATEGORY_ID, USER_ID);
 
-        verify(expenseRepository, times(1)).reassignCategory(category, fallback);
+        verify(expenseRepository, times(1)).reassignCategory(category, fallback, USER_ID);
         verify(budgetRepository, times(1)).clearCategory(category);
         verify(categoryRepository, times(1)).delete(category);
         verify(categoryRepository, never()).save(any(Category.class));
@@ -159,7 +160,7 @@ class CategoryServiceTest {
 
         verify(categoryRepository, times(1)).save(argThat(c ->
                 c.isPredefined() && Category.DEFAULT_SYSTEM_NAME.equals(c.getName()) && c.getUser() == user1));
-        verify(expenseRepository, times(1)).reassignCategory(eq(category), any(Category.class));
+        verify(expenseRepository, times(1)).reassignCategory(eq(category), any(Category.class), eq(USER_ID));
         verify(budgetRepository, times(1)).clearCategory(category);
         verify(categoryRepository, times(1)).delete(category);
     }
@@ -196,7 +197,7 @@ class CategoryServiceTest {
 
         assertTrue(systemCategory.isActive());
         verify(categoryRepository, never()).delete(any(Category.class));
-        verify(expenseRepository, never()).reassignCategory(any(), any());
+        verify(expenseRepository, never()).reassignCategory(any(), any(), any());
         verify(budgetRepository, never()).clearCategory(any());
     }
 
@@ -240,8 +241,7 @@ class CategoryServiceTest {
         Page<Category> page = new PageImpl<>(List.of(catA, catB), pageable, 2);
 
         when(categoryRepository.findByUserIdAndActiveTrue(USER_ID, pageable)).thenReturn(page);
-        List<Object[]> rows = new java.util.ArrayList<>();
-        rows.add(new Object[]{10L, new BigDecimal("150.00"), 3L});
+        List<CategoryTotalDTO> rows = List.of(new CategoryTotalDTO(10L, new BigDecimal("150.00"), 3L));
         when(expenseRepository.sumByCategoryIds(eq(USER_ID), anyCollection())).thenReturn(rows);
 
         Page<CategoryWithStatsResponseDTO> result = categoryService.findAllWithStats(USER_ID, null, pageable);

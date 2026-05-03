@@ -28,6 +28,8 @@ import pe.com.carlosh.tallyapi.user.dto.TierInfoDTO;
 import pe.com.carlosh.tallyapi.user.dto.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 @Service
@@ -107,12 +109,19 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
         Tier tier = user.getTier();
 
-        BigDecimal totalSpent = expenseRepository.sumTotalByUserId(userId);
-        BigDecimal thisMonth = expenseRepository.sumTotalByUserIdThisMonth(userId);
-        BigDecimal lastMonth = expenseRepository.sumTotalByUserIdLastMonth(userId);
+        YearMonth currentYm = YearMonth.now();
+        LocalDate thisFrom = currentYm.atDay(1);
+        LocalDate thisTo = currentYm.atEndOfMonth();
+        YearMonth previousYm = currentYm.minusMonths(1);
+        LocalDate lastFrom = previousYm.atDay(1);
+        LocalDate lastTo = previousYm.atEndOfMonth();
+
+        BigDecimal totalSpent = expenseRepository.sumByFilters(userId, null, null, null, null);
+        BigDecimal thisMonth = expenseRepository.sumByFilters(userId, null, null, thisFrom, thisTo);
+        BigDecimal lastMonth = expenseRepository.sumByFilters(userId, null, null, lastFrom, lastTo);
         BigDecimal vsLastMonthPercent = percentChange(thisMonth, lastMonth);
-        long expenseCount = expenseRepository.countByUserId(userId);
-        long thisMonthCount = expenseRepository.countByUserIdThisMonth(userId);
+        long expenseCount = expenseRepository.countByFilters(userId, null, null, null, null);
+        long thisMonthCount = expenseRepository.countByFilters(userId, null, null, thisFrom, thisTo);
 
 
         long budgetCount = budgetRepository.countByUserIdAndActiveTrue(userId);
@@ -126,7 +135,7 @@ public class UserService {
 
         List<Category> categories = categoryRepository.findByUserIdAndActiveTrue(userId);
         for (Category cat : categories) {
-            BigDecimal spent = expenseRepository.sumTotalByUserIdAndCategoryIdThisMonth(userId, cat.getId());
+            BigDecimal spent = expenseRepository.sumByFilters(userId, cat.getId(), null, thisFrom, thisTo);
             if (spent.compareTo(topThisMonth) > 0) {
                 topThisMonth = spent;
                 topName = cat.getName();
@@ -137,8 +146,8 @@ public class UserService {
         BigDecimal topSpent = BigDecimal.ZERO;
         long topThisMonthCount = 0;
         if (topCategoryId != null) {
-            topSpent = expenseRepository.sumTotalByUserIdAndCategoryId(userId, topCategoryId);
-            topThisMonthCount = expenseRepository.countByUserIdAndCategoryIdThisMonth(userId, topCategoryId);
+            topSpent = expenseRepository.sumByFilters(userId, topCategoryId, null, null, null);
+            topThisMonthCount = expenseRepository.countByFilters(userId, topCategoryId, null, thisFrom, thisTo);
         }
 
         TierInfoDTO tierInfo = new TierInfoDTO(tier.getName().name(), tier.getMaxCategories(), tier.getMaxBudgets());
